@@ -1,6 +1,7 @@
 package com.bedrockminer.tutorial.blocks;
 
 import java.util.List;
+import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
@@ -19,6 +20,8 @@ public class ModBlockSlab extends BlockSlab {
 	public ModBlockSlab(String unlocalizedName, boolean isDoubleSlab, Material material) {
 		super(isDoubleSlab, material);
 		this.setBlockName(unlocalizedName);
+		this.setHardness(4.0f);
+		this.setResistance(8.0f);
 		this.setCreativeTab(CreativeTabs.tabBlock);
 	}
 
@@ -62,5 +65,15 @@ public class ModBlockSlab extends BlockSlab {
 
 		int meta = world.getBlockMetadata(x, y, z) & 7;
 		return new ItemStack(block, 1, meta);
+	}
+
+	@Override
+	public Item getItemDropped(int meta, Random rand, int fortune) {
+		return Item.getItemFromBlock(ModBlocks.slab);
+	}
+
+	@Override
+	public int quantityDropped(int meta, int fortune, Random random) {
+		return this.field_150004_a ? 2 : 1;
 	}
 }
