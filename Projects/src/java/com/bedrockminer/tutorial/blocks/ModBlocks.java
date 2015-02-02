@@ -6,5 +6,7 @@ public class ModBlocks {
 
 	public static void init() {
 		GameRegistry.registerBlock(new BlockTileEntity("te"), "te");
+
+		GameRegistry.registerTileEntity(TileTutorial.class, "tutorial_tile");
 	}
 }
