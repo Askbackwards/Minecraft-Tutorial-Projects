@@ -5,11 +5,16 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 
 public class TileTutorial extends TileEntity implements IInventory {
 
 	private ItemStack[] inventory = new ItemStack[this.getSizeInventory()];
+
+	private String customInventoryName;
 
 	@Override
 	public int getSizeInventory() {
@@ -59,12 +64,16 @@ public class TileTutorial extends TileEntity implements IInventory {
 
 	@Override
 	public String getInventoryName() {
-		return "inventory.tiletutorial.title";
+		return this.hasCustomInventoryName() ? this.customInventoryName : "inventory.tiletutorial.title";
 	}
 
 	@Override
 	public boolean hasCustomInventoryName() {
-		return false;
+		return this.customInventoryName != null;
+	}
+
+	public void setCustomInventoryName(String name) {
+		this.customInventoryName = name;
 	}
 
 	@Override
@@ -105,6 +114,12 @@ public class TileTutorial extends TileEntity implements IInventory {
                 this.setInventorySlotContents(j, ItemStack.loadItemStackFromNBT(stackTag));
             }
         }
+
+        if (nbt.hasKey("CustomName", 8))
+        {
+        	System.out.println("Loaded");
+            this.customInventoryName = nbt.getString("CustomName");
+        }
 	}
 
 	@Override
@@ -124,5 +139,27 @@ public class TileTutorial extends TileEntity implements IInventory {
         }
 
         nbt.setTag("Items", itemList);
+
+        if (this.hasCustomInventoryName())
+        {
+        	System.out.println("Saved");
+            nbt.setString("CustomName", this.customInventoryName);
+        }
+	}
+
+	@Override
+	public Packet getDescriptionPacket() {
+		NBTTagCompound nbt = new NBTTagCompound();
+		this.writeToNBT(nbt);
+		return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, this.blockMetadata, nbt);
+	}
+
+	@Override
+	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
+		this.xCoord = pkt.func_148856_c();
+		this.yCoord = pkt.func_148855_d();
+		this.zCoord = pkt.func_148854_e();
+		this.blockMetadata = pkt.func_148853_f();
+		this.readFromNBT(pkt.func_148857_g());
 	}
 }
